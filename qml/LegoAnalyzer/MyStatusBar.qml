@@ -11,7 +11,7 @@ StatusBar {
         Label {
             id: logLabel
             text: ""
-            color: '#ffffffff'
+            color: '#ff000000'
             Timer {
                 id: logTimer
                 interval: showMsgTime
@@ -25,7 +25,7 @@ StatusBar {
         Label {
             id: warnLabel
             text: ""
-            color: '#ffff8800'
+            color: '#ffaa2200'
             Timer {
                 id: warnTimer
                 interval: showMsgTime

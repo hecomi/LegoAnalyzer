@@ -9,13 +9,18 @@ namespace MontBlanc
 class AnalyzedImage : public Image
 {
     Q_OBJECT
+    Q_PROPERTY(int blur MEMBER blur_ NOTIFY blurChanged)
 
 public:
     explicit AnalyzedImage(QQuickItem *parent = 0);
     Q_INVOKABLE void analyze(const QVariant& var);
 
 signals:
-    void analyzed(bool success);
+    void blurChanged() const;
+    void analyzed(bool success) const;
+
+private:
+    int blur_;
 };
 
 }

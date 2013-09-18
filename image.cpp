@@ -7,7 +7,7 @@ namespace MontBlanc
 
 
 Image::Image(QQuickItem *parent)
-    : QQuickPaintedItem(parent)
+    : QQuickPaintedItem(parent), aspect_(1.0)
 {
 }
 
@@ -51,6 +51,9 @@ void Image::setSrc(const QString& src)
         return;
     }
 
+    aspect_ = static_cast<double>(image_.size().width) / image_.size().height;
+
+    emit aspectChanged();
     emit srcLoaded(true);
 }
 
@@ -58,6 +61,12 @@ void Image::setSrc(const QString& src)
 QVariant Image::image() const
 {
     return QVariant::fromValue(image_);
+}
+
+
+double Image::aspect() const
+{
+    return aspect_;
 }
 
 

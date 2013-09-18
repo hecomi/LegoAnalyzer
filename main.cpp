@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     QtQuick2ApplicationViewer viewer;
 
     // Register types
+    qmlRegisterType<MontBlanc::Image>("OpenCV", 1, 0, "PlainImage");
     qmlRegisterType<MontBlanc::CameraImage>("OpenCV", 1, 0, "Camera");
     qmlRegisterType<MontBlanc::AnalyzedImage>("OpenCV", 1, 0, "AnalyzedImage");
 
