@@ -9,7 +9,7 @@ Rectangle {
     width: 1280
     height: 720
 
-    SystemPalette {id: syspal}
+    SystemPalette { id: syspal }
     color: syspal.window
 
     MyMenuBar {

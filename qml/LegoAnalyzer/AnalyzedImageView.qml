@@ -5,6 +5,7 @@ import OpenCV 1.0
 import '.'
 
 RowLayout {
+    id: view
     property var message: console
 
     PlainImage {
@@ -22,19 +23,43 @@ RowLayout {
 
             Mesh {
                 id: targetArea
-                numX: meshNumSlider.value
-                numY: meshNumSlider.value
-                x: 100; y: 100
-                width: 100; height: 100
+                numX: meshNumXSlider.value
+                numY: meshNumYSlider.value
+                x: 100
+                y: 100
+                width: meshWidthSlider.value
+                height: meshHeightSlider.value
                 Rectangle {
                     border.color: targetArea.lineColor
                     anchors.fill: parent
                     color: '#44000000'
                 }
                 MouseArea {
+                    id: dragMouseArea
                     anchors.fill: parent
                     drag.target: targetArea
                     drag.axis: Drag.XAndYAxis
+                    cursorShape: Qt.PointingHandCursor
+                }
+                MouseArea {
+                    id: expandMouseArea
+                    width: 10
+                    height: 10
+                    cursorShape: Qt.SizeFDiagCursor
+                    anchors.right: dragMouseArea.right
+                    anchors.bottom: dragMouseArea.bottom
+                    property int baseX: 0
+                    property int baseY: 0
+                    onClicked: {
+                        baseX = mouse.x;
+                        baseY = mosue.y;
+                    }
+                    onPositionChanged: {
+                        var newWidth  = meshWidthSlider.value + (mouse.x - baseX);
+                        var newHeight = meshHeightSlider.value + (mouse.y - baseY);
+                        meshWidthSlider.setValue(newWidth);
+                        meshHeightSlider.setValue(newHeight);
+                    }
                 }
             }
 
@@ -61,37 +86,58 @@ RowLayout {
             }
         }
 
-        GroupBox {
-            ColumnLayout {
-                MySlider {
-                    id: blurSlider
-                    label: 'Blur'
-                    defaultValue: 0
-                    onValueChanged: {
-                        var blur = value;
-                        if (blur % 2 == 0) blur -= 1;
-                        message.log('Blur', blur);
-                        analyzedImage.blur = blur;
-                        analyzedImage.applyEffects(originalImage.image);
+        ColumnLayout {
+            spacing: 20
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+
+            GroupBox {
+                ColumnLayout {
+                    spacing: 16
+                    MySlider {
+                        id: blurSlider
+                        label: 'Blur'
+                        defaultValue: 0
+                        onValueChanged: {
+                            var blur = value;
+                            if (blur % 2 == 0) blur -= 1;
+                            message.log('Blur', blur);
+                            analyzedImage.blur = blur;
+                            analyzedImage.applyEffects(originalImage.image);
+                        }
+                    }
+                    MySlider {
+                        id: meshNumXSlider
+                        width: parent.width
+                        label: 'Mesh Num X'
+                        max: 50
+                        defaultValue: 10
+                    }
+                    MySlider {
+                        id: meshNumYSlider
+                        label: 'Mesh Num Y'
+                        max: 50
+                        defaultValue: 10
+                    }
+                    MySlider {
+                        id: meshWidthSlider
+                        label: 'Width'
+                        max: analyzedImage.width
+                        defaultValue: 100
+                    }
+                    MySlider {
+                        id: meshHeightSlider
+                        label: 'Height'
+                        max: analyzedImage.height
+                        defaultValue: 100
                     }
                 }
-                MySlider {
-                    id: meshNumSlider
-                    label: 'Mesh Num'
-                    max: 50
-                    defaultValue: 10
-                }
-                MySlider {
-                    id: meshWidthSlider
-                    label: 'Width'
-                    max: 50
-                    defaultValue: 10
-                }
-                Button {
-                    text: 'Analyze'
-                    onClicked: {
-                        analyzedImage.analyze(analyzedImage.image);
-                    }
+            }
+
+            Button {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                text: 'Analyze'
+                onClicked: {
+                    analyzedImage.analyze(analyzedImage.image);
                 }
             }
         }
