@@ -44,16 +44,18 @@ const QString& Image::src() const
 
 void Image::setSrc(const QString& src)
 {
-    image_ = cv::imread(src.toStdString());
-
-    if (image_.empty()) {
+    auto image = cv::imread(src.toStdString());
+    if (image.empty()) {
         emit srcLoaded(false);
         return;
     }
 
+    image_ = image;
     aspect_ = static_cast<double>(image_.size().width) / image_.size().height;
 
     emit aspectChanged();
+    emit imageWidthChanged();
+    emit imageHeightChanged();
     emit srcLoaded(true);
 }
 
@@ -64,11 +66,22 @@ QVariant Image::image() const
 }
 
 
+int Image::imageWidth() const
+{
+    return image_.size().width;
+}
+
+
+int Image::imageHeight() const
+{
+    return image_.size().height;
+}
+
+
 double Image::aspect() const
 {
     return aspect_;
 }
-
 
 
 }

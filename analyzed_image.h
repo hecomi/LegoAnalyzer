@@ -20,7 +20,7 @@ class AnalyzedImage : public Image
 public:
     explicit AnalyzedImage(QQuickItem *parent = 0);
     Q_INVOKABLE void applyEffects(const QVariant& var);
-    Q_INVOKABLE void analyze(const QVariant& var);
+    Q_INVOKABLE QVariantList analyze(const QVariant& var);
 
 private:
     /*

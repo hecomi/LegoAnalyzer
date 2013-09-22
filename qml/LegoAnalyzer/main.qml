@@ -24,6 +24,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: statusBar.top
         anchors.margins: 12
+        clip: true
 
         Tab {
             id: cameraView
