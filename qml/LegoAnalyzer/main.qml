@@ -2,7 +2,7 @@ import QtQuick 2.1
 import QtQuick.Window 2.1
 import QtQuick.Controls 1.0
 import OpenCV 1.0
-import '.'
+import 'Contents'
 
 Rectangle {
     id: window

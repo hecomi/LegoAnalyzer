@@ -8,11 +8,18 @@ RowLayout {
     id: view
     property var message: console
 
+    Storage {
+        id: localStorage
+        name: 'LegoAnalyzer'
+        description: 'Lego Analyzer Settings'
+        Component.onCompleted: initialize();
+    }
+
     PlainImage {
         id: originalImage
         width: 0
         height: 0
-        src: "/Users/hecomi/tmp/dummy_input.png"
+        src: "/Users/hecomi/Desktop/dummy_input2.png"
     }
 
     RowLayout {
@@ -30,7 +37,7 @@ RowLayout {
 
             Mesh {
                 id: targetArea
-                lineColor: '#ccff0000'
+                lineColor: '#ff0000'
                 numX: meshNumXSlider.value
                 numY: meshNumYSlider.value
                 x: meshXSlider.value * analyzedImage.ratioX;
@@ -97,6 +104,7 @@ RowLayout {
 
             Component.onCompleted: {
                 applyEffects(originalImage.image);
+                view.load();
             }
 
             onSrcLoaded: {
@@ -126,7 +134,7 @@ RowLayout {
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
             Text {
-                text: 'Effects'
+                text: 'Effects / Parameters'
                 font.bold: true
             }
 
@@ -139,14 +147,24 @@ RowLayout {
                     MySlider {
                         id: blurSlider
                         label: 'Median Blur'
-                        defaultValue: 0
+                        defaultValue: localStorage.get('blurSlider');
                         onValueChanged: {
                             var blur = value;
                             if (blur % 2 == 0) blur -= 1;
                             message.log('Blur', blur);
                             analyzedImage.blur = blur;
                             analyzedImage.applyEffects(originalImage.image);
+                            localStorage.set('blurSlider', value);
                         }
+                    }
+
+                    MySlider {
+                        id: thresholdSlider
+                        label: 'Threshold'
+                        min: 0
+                        max: 255
+                        defaultValue: localStorage.get('thresholdSlider')
+                        onValueChanged: localStorage.set('thresholdSlider', value)
                     }
                 }
             }
@@ -166,28 +184,32 @@ RowLayout {
                         id: meshXSlider
                         label: 'Target X'
                         max: analyzedImage.imageWidth
-                        defaultValue: 10
+                        defaultValue: localStorage.get('meshXSlider')
+                        onValueChanged: localStorage.set('meshXSlider', value)
                     }
 
                     MySlider {
                         id: meshYSlider
                         label: 'TargetY'
                         max: analyzedImage.imageHeight
-                        defaultValue: 10
+                        defaultValue: localStorage.get('meshYSlider')
+                        onValueChanged: localStorage.set('meshYSlider', value)
                     }
 
                     MySlider {
                         id: meshWidthSlider
                         label: 'Target Width'
                         max: analyzedImage.imageWidth
-                        defaultValue: 100
+                        defaultValue: localStorage.get('meshWidthSlider')
+                        onValueChanged: localStorage.set('meshWidthSlider', value)
                     }
 
                     MySlider {
                         id: meshHeightSlider
                         label: 'Target Height'
                         max: analyzedImage.imageHeight
-                        defaultValue: 100
+                        defaultValue: localStorage.get('meshHeightSlider')
+                        onValueChanged: localStorage.set('meshHeightSlider', value)
                     }
 
                     MySlider {
@@ -195,7 +217,8 @@ RowLayout {
                         label: 'Mesh Num X'
                         min: 1
                         max: 50
-                        defaultValue: 10
+                        defaultValue: localStorage.get('meshNumXSlider')
+                        onValueChanged: localStorage.set('meshNumXSlider', value)
                     }
 
                     MySlider {
@@ -203,7 +226,8 @@ RowLayout {
                         label: 'Mesh Num Y'
                         min: 1
                         max: 50
-                        defaultValue: 10
+                        defaultValue: localStorage.get('meshNumYSlider')
+                        onValueChanged: localStorage.set('meshNumYSlider', value)
                     }
                 }
             }
@@ -223,9 +247,27 @@ RowLayout {
                         analyzedImage.targetY = meshYSlider.value;
                         analyzedImage.targetWidth  = meshWidthSlider.value;
                         analyzedImage.targetHeight = meshHeightSlider.value;
-                        var result = analyzedImage.analyze(analyzedImage.image);
+                        var averageColors = analyzedImage.analyze(analyzedImage.image);
 
-                        for (var x in result) console.log(result[x]);
+                        // calc average color for the whole area
+                        var wholeAverage = 0;
+                        for (var i = 0; i < averageColors.length; ++i) {
+                            for (var j = 0; j < averageColors[0].length; ++j) {
+                                wholeAverage += averageColors[i][j];
+                            }
+                        }
+                        wholeAverage /= averageColors.length * averageColors[0].length;
+
+                        // check the darker area
+                        var checkArr = [];
+                        for (var i = 0; i < averageColors.length; ++i) {
+                            checkArr[i] = [];
+                            for (var j = 0; j < averageColors[0].length; ++j) {
+                                var diff = wholeAverage - averageColors[i][j];
+                                checkArr[i][j] = (diff > thresholdSlider.value) ? 1 : 0;
+                            }
+                        }
+                        targetArea.texts = checkArr;
                     }
                 }
 
@@ -233,6 +275,7 @@ RowLayout {
                     text: 'Reset'
                     onClicked: {
                         analyzedImage.applyEffects(originalImage.image);
+                        targetArea.texts = [];
                     }
                 }
             }

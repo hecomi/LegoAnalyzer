@@ -1,7 +1,4 @@
 #include <QtGui/QGuiApplication>
-#include <QQmlEngine>
-#include <QQmlContext>
-#include <QScopedPointer>
 #include "qtquick2applicationviewer.h"
 #include "camera_image.h"
 #include "analyzed_image.h"

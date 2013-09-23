@@ -35,6 +35,7 @@ ColumnLayout {
     }
 
     function setValue(newValue) {
-        slider.value = newValue / (max - min);
+        if (!newValue) return;
+        slider.value = (newValue - min) / (max - min);
     }
 }

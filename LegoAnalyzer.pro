@@ -36,4 +36,5 @@ QMAKE_LIBS   += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_nonfree
 
 OTHER_FILES += \
 	qml/LegoAnalyzer/Camera.qml \
-	qml/LegoAnalyzer/MyMenuBar.qml
+	qml/LegoAnalyzer/MyMenuBar.qml \
+    qml/LegoAnalyzer/Contents/Storage.qml
