@@ -2,6 +2,8 @@ import QtQuick 2.1
 import OpenCV 1.0
 
 Camera {
+    id: camera
+
     property int frameRate: 30
 
     function start() {

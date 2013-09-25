@@ -6,6 +6,7 @@ import '../Common'
 import 'Camera'
 
 RowLayout {
+    property alias camera: camera
 
     Storage {
         id: localStorage
@@ -13,11 +14,14 @@ RowLayout {
         description: 'Lego Analyzer Settings'
     }
 
-    Camera {
-        id: camera
-        frameRate: 30
+    GroupBox {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        Camera {
+            id: camera
+            frameRate: 30
+            anchors.fill: parent
+        }
     }
 
     ColumnLayout {
@@ -33,10 +37,11 @@ RowLayout {
             ColumnLayout {
 
                 CheckBox {
+                    property string name: 'isUndistorted'
                     text: 'Apply undistortion'
-                    checked: localStorage.get(text) || false
+                    checked: localStorage.get(name) || false
                     onCheckedChanged: {
-                        localStorage.set(text, checked);
+                        localStorage.set(name, checked);
                         camera.isUndistorted = checked;
                     }
                 }

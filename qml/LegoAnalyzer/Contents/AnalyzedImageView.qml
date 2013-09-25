@@ -5,6 +5,7 @@ import OpenCV 1.0
 import '.'
 import '../Style'
 import '../Common'
+import 'Camera'
 
 RowLayout {
     id: view
@@ -17,111 +18,179 @@ RowLayout {
     }
 
     PlainImage {
-        id: originalImage
+        id: plainImage
+        Layout.maximumWidth: 0
+        Layout.maximumHeight: 0
+        src: imagePath.text
+    }
+
+    Rectangle {
         width: 0
         height: 0
-        src: "/Users/hecomi/Desktop/dummy_input2.png"
+        clip: true
+        Camera {
+            id: camera
+            frameRate: 30
+            width: 640
+            height: 480
+            onImageChanged: {
+                camera.isUndistorted = localStorage.get('isUndistorted') || camera.isUndistorted;
+                camera.fx = localStorage.get('fx') || camera.fx;
+                camera.fy = localStorage.get('fy') || camera.fy;
+                camera.cx = localStorage.get('cx') || camera.cx;
+                camera.cy = localStorage.get('cy') || camera.cy;
+                camera.k1 = localStorage.get('k1') || camera.k1;
+                camera.k2 = localStorage.get('k2') || camera.k2;
+                camera.p1 = localStorage.get('p1') || camera.p1;
+                camera.p2 = localStorage.get('p2') || camera.p2;
+            }
+        }
+    }
+
+    function getImage() {
+        return (useCamera.checked) ? camera.image : plainImage.image;
     }
 
     RowLayout {
-        AnalyzedImage {
-            id: analyzedImage
-            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.fillHeight: true
-            Layout.fillWidth : true
-            Layout.maximumHeight: view.height
-            Layout.maximumWidth:  view.width - propertiesBox.width
-            clip: true
-
-            property double ratioX: analyzedImage.width  / analyzedImage.imageWidth
-            property double ratioY: analyzedImage.height / analyzedImage.imageHeight
-
-            Mesh {
-                id: targetArea
-                lineColor: '#ff0000'
-                numX: meshNumXSlider.value
-                numY: meshNumYSlider.value
-                x: meshXSlider.value * analyzedImage.ratioX;
-                y: meshYSlider.value * analyzedImage.ratioY;
-                width: meshWidthSlider.value * analyzedImage.ratioX;
-                height: meshHeightSlider.value * analyzedImage.ratioY;
-
-                Rectangle {
-                    border.color: targetArea.lineColor
+        ColumnLayout {
+            GroupBox {
+                id: imageBox
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.maximumWidth: view.width - 250
+                Layout.maximumHeight: view.height - 40
+                AnalyzedImage {
+                    id: analyzedImage
                     anchors.fill: parent
-                    color: '#44000000'
-                }
+                    clip: true
 
-                MouseArea {
-                    id: dragMouseArea
-                    anchors.fill: parent
-                    drag.target: targetArea
-                    drag.axis: Drag.XAndYAxis
-                    cursorShape: Qt.PointingHandCursor
-                    property int deltaX: 0
-                    property int deltaY: 0
-                    property int deltaMax: 20
-                    onPositionChanged: {
-                        meshXSlider.setValue(targetArea.x / analyzedImage.ratioX);
-                        meshYSlider.setValue(targetArea.y / analyzedImage.ratioY);
-                    }
-                    onWheel: {
-                        deltaX += wheel.pixelDelta.x;
-                        deltaY += wheel.pixelDelta.y;
-                        if (deltaX != 0 && deltaX % deltaMax == 0) {
-                            var newNumX = meshNumXSlider.value + deltaX/deltaMax;
-                            meshNumXSlider.setValue(newNumX);
-                            deltaX = 0;
+                    property double ratioX: analyzedImage.width  / analyzedImage.imageWidth
+                    property double ratioY: analyzedImage.height / analyzedImage.imageHeight
+
+                    Mesh {
+                        id: targetArea
+                        lineColor: '#ff0000'
+                        numX: meshNumXSlider.value
+                        numY: meshNumYSlider.value
+                        x: meshXSlider.value * analyzedImage.ratioX;
+                        y: meshYSlider.value * analyzedImage.ratioY;
+                        width: meshWidthSlider.value * analyzedImage.ratioX;
+                        height: meshHeightSlider.value * analyzedImage.ratioY;
+
+                        Rectangle {
+                            border.color: targetArea.lineColor
+                            anchors.fill: parent
+                            color: '#44000000'
                         }
-                        if (deltaY != 0 && deltaY % deltaMax == 0) {
-                            var newNumY = meshNumYSlider.value + deltaY/deltaMax;
-                            meshNumYSlider.setValue(newNumY);
-                            deltaY = 0;
+
+                        MouseArea {
+                            id: dragMouseArea
+                            anchors.fill: parent
+                            drag.target: targetArea
+                            drag.axis: Drag.XAndYAxis
+                            cursorShape: Qt.PointingHandCursor
+                            property int deltaX: 0
+                            property int deltaY: 0
+                            property int deltaMax: 20
+                            onPositionChanged: {
+                                meshXSlider.setValue(targetArea.x / analyzedImage.ratioX);
+                                meshYSlider.setValue(targetArea.y / analyzedImage.ratioY);
+                            }
+                            onWheel: {
+                                deltaX += wheel.pixelDelta.x;
+                                deltaY += wheel.pixelDelta.y;
+                                if (deltaX !== 0 && deltaX % deltaMax == 0) {
+                                    var newNumX = meshNumXSlider.value + deltaX/deltaMax;
+                                    meshNumXSlider.setValue(newNumX);
+                                    deltaX = 0;
+                                }
+                                if (deltaY !== 0 && deltaY % deltaMax == 0) {
+                                    var newNumY = meshNumYSlider.value + deltaY/deltaMax;
+                                    meshNumYSlider.setValue(newNumY);
+                                    deltaY = 0;
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: expandMouseArea
+                            width: 10
+                            height: 10
+                            cursorShape: Qt.SizeFDiagCursor
+                            anchors.right: dragMouseArea.right
+                            anchors.bottom: dragMouseArea.bottom
+                            property int baseX: 0
+                            property int baseY: 0
+                            onClicked: {
+                                baseX = mouse.x;
+                                baseY = mouse.y;
+                            }
+                            onPositionChanged: {
+                                var newWidth  = meshWidthSlider.value + (mouse.x - baseX) / analyzedImage.ratioX;
+                                var newHeight = meshHeightSlider.value + (mouse.y - baseY) / analyzedImage.ratioX;
+                                meshWidthSlider.setValue(newWidth);
+                                meshHeightSlider.setValue(newHeight);
+                            }
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        applyEffects(getImage());
+                    }
+
+                    onSrcLoaded: {
+                        if (!success) {
+                            message.error('No such file:', src);
+                        }
+                    }
+
+                    onApplied: {
+                        if (!success) {
+                            message.error('Apply effects failed.');
+                        }
+                    }
+
+                    onAnalyzed: {
+                        if (!success) {
+                            message.error('Analysis failed.', msg);
                         }
                     }
                 }
+            }
 
-                MouseArea {
-                    id: expandMouseArea
-                    width: 10
-                    height: 10
-                    cursorShape: Qt.SizeFDiagCursor
-                    anchors.right: dragMouseArea.right
-                    anchors.bottom: dragMouseArea.bottom
-                    property int baseX: 0
-                    property int baseY: 0
-                    onClicked: {
-                        baseX = mouse.x;
-                        baseY = mouse.y;
+            GroupBox {
+                id: sourceSelectField
+                Layout.fillWidth: true
+                Layout.maximumWidth: view.width - 250
+                clip: true
+
+                RowLayout {
+                    Text {
+                        text: 'Use Camera: '
                     }
-                    onPositionChanged: {
-                        var newWidth  = meshWidthSlider.value + (mouse.x - baseX) / analyzedImage.ratioX;
-                        var newHeight = meshHeightSlider.value + (mouse.y - baseY) / analyzedImage.ratioX;
-                        meshWidthSlider.setValue(newWidth);
-                        meshHeightSlider.setValue(newHeight);
+                    CheckBox {
+                        id: useCamera
+                        checked: false
                     }
-                }
-            }
-
-            Component.onCompleted: {
-                applyEffects(originalImage.image);
-            }
-
-            onSrcLoaded: {
-                if (!success) {
-                    message.error('No such file:', src);
-                }
-            }
-
-            onApplied: {
-                if (!success) {
-                    message.error('Apply effects failed.');
-                }
-            }
-
-            onAnalyzed: {
-                if (!success) {
-                    message.error('Analysis failed.', msg);
+                    Item {
+                        Layout.preferredWidth: 12
+                    }
+                    Text {
+                        text: 'Dummy Image: '
+                    }
+                    TextField {
+                        id: imagePath
+                        Layout.minimumWidth: 400
+                        text: localStorage.get('imagePath') || '/Users/hecomi/Desktop/dummy_input2.png'
+                        onAccepted: {
+                            localStorage.set('imagePath', text);
+                            plainImage.src = text;
+                            if (!useCamera) {
+                                analyzedImage.applyEffects(plainImage.image);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -157,7 +226,7 @@ RowLayout {
                                     if (blur % 2 == 0) blur -= 1;
                                     message.log('Blur', blur);
                                     analyzedImage.blur = blur;
-                                    analyzedImage.applyEffects(originalImage.image);
+                                    analyzedImage.applyEffects(getImage());
                                     localStorage.set('blurSlider', value);
                                 }
                             }
@@ -339,7 +408,7 @@ RowLayout {
                         Button {
                             text: 'Reset'
                             onClicked: {
-                                analyzedImage.applyEffects(originalImage.image);
+                                analyzedImage.applyEffects(getImage());
                                 targetArea.texts = [];
                             }
                         }
