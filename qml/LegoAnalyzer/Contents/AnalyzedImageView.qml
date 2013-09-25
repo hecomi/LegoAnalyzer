@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import OpenCV 1.0
 import '.'
 import '../Style'
+import '../Common'
 
 RowLayout {
     id: view
@@ -137,9 +138,8 @@ RowLayout {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
-                    Text {
+                    Title {
                         text: 'Effects / Parameters'
-                        font.bold: true
                     }
 
                     GroupBox {
@@ -185,9 +185,8 @@ RowLayout {
 
                 ColumnLayout {
 
-                    Text {
+                    Title {
                         text: 'Target'
-                        font.bold: true
                     }
 
                     GroupBox {

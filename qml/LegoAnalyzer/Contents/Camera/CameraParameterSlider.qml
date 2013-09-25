@@ -1,4 +1,5 @@
 import '..'
+import '../../Common'
 
 MySlider {
     property double baseValue: defaultValue

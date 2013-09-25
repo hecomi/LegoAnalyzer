@@ -21,7 +21,6 @@ ColumnLayout {
             property int width_: 130
             Layout.preferredWidth: width_
             value: (defaultValue - min) / (max - min)
-            onValueChanged: console.log(max, min, parent.parent.value)
         }
         TextField {
             id: input

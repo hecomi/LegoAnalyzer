@@ -2,6 +2,7 @@ import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import '.'
+import '../Common'
 import 'Camera'
 
 RowLayout {
@@ -22,16 +23,14 @@ RowLayout {
     ColumnLayout {
         Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
-        Text {
-            text: 'Camera Parameters'
-            font.bold: true
+        Title {
+            text: 'Flags'
         }
 
         GroupBox {
-            id: propertiesBox
+            Layout.preferredWidth: cameraParameters.width
 
             ColumnLayout {
-                spacing: 10
 
                 CheckBox {
                     text: 'Apply undistortion'
@@ -41,6 +40,19 @@ RowLayout {
                         camera.isUndistorted = checked;
                     }
                 }
+            }
+        }
+
+        Item { Layout.minimumHeight: 10 }
+
+        Title {
+            text: 'Camera Parameters'
+        }
+
+        GroupBox {
+            id: cameraParameters
+            ColumnLayout {
+                spacing: 10
 
                 CameraParameterSlider {
                     id: fx
