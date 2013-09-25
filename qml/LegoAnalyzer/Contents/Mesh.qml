@@ -34,7 +34,7 @@ Rectangle {
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             context.shadowBlur    = 3;
-            context.font          = ((grid.width > grid.height) ? Math.floor(grid.height/3) : Math.floor(grid.width/3)) + 'px bold';
+            context.font          = ((grid.width > grid.height) ? Math.floor(grid.height/2) : Math.floor(grid.width/3)) + 'px bold';
             context.textAlign     = 'center';
             context.textBaseline  = 'middle';
 

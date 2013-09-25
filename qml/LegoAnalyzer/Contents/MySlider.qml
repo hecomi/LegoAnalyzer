@@ -3,11 +3,11 @@ import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
 ColumnLayout {
-    property int    min   : 0
-    property int    max   : 100
-    property int    value : min + slider.value * (max - min)
+    property double min   : 0.0
+    property double max   : 100.0
+    property double value : min + slider.value * (max - min)
     property string label : 'No Name'
-    property int    defaultValue : 0
+    property double defaultValue : 0.0
     property alias  sliderWidth  : slider.width_
     property alias  textWidth    : input.width_
 
@@ -18,24 +18,29 @@ ColumnLayout {
     RowLayout {
         Slider {
             id: slider
-            property int width_: 150
+            property int width_: 130
             Layout.preferredWidth: width_
             value: (defaultValue - min) / (max - min)
+            onValueChanged: console.log(max, min, parent.parent.value)
         }
         TextField {
             id: input
             property int width_: 50
             Layout.preferredWidth: width_
-            text: value
-            onAccepted: {
-                if (text > max) text = max;
-                setValue(text);
-            }
+            text: value.toString().substring(0, 10)
+            onAccepted: setValue(text);
         }
     }
 
     function setValue(newValue) {
         if (!newValue) return;
-        slider.value = (newValue - min) / (max - min);
+
+        if (newValue > max) {
+            slider.value = 1.0;
+        } else if (newValue < min) {
+            slider.value = 0.0;
+        } else {
+            slider.value = (newValue - min) / (max - min);
+        }
     }
 }

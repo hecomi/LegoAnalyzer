@@ -3,6 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import OpenCV 1.0
 import '.'
+import '../Style'
 
 RowLayout {
     id: view
@@ -12,7 +13,6 @@ RowLayout {
         id: localStorage
         name: 'LegoAnalyzer'
         description: 'Lego Analyzer Settings'
-        Component.onCompleted: initialize();
     }
 
     PlainImage {
@@ -104,7 +104,6 @@ RowLayout {
 
             Component.onCompleted: {
                 applyEffects(originalImage.image);
-                view.load();
             }
 
             onSrcLoaded: {
@@ -130,164 +129,232 @@ RowLayout {
             Layout.fillWidth: true
         }
 
-        ColumnLayout {
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-
-            Text {
-                text: 'Effects / Parameters'
-                font.bold: true
-            }
-
-            GroupBox {
-                id: propertiesBox
-                Layout.minimumWidth: buttons.width
+        ScrollView {
+            Layout.fillHeight: true
+            ColumnLayout {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
                 ColumnLayout {
-                    spacing: 10
-                    MySlider {
-                        id: blurSlider
-                        label: 'Median Blur'
-                        defaultValue: localStorage.get('blurSlider');
-                        onValueChanged: {
-                            var blur = value;
-                            if (blur % 2 == 0) blur -= 1;
-                            message.log('Blur', blur);
-                            analyzedImage.blur = blur;
-                            analyzedImage.applyEffects(originalImage.image);
-                            localStorage.set('blurSlider', value);
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+
+                    Text {
+                        text: 'Effects / Parameters'
+                        font.bold: true
+                    }
+
+                    GroupBox {
+                        id: propertiesBox
+                        Layout.minimumWidth: buttons.width
+
+                        ColumnLayout {
+                            spacing: 10
+                            MySlider {
+                                id: blurSlider
+                                label: 'Median Blur'
+                                defaultValue: localStorage.get('blurSlider');
+                                onValueChanged: {
+                                    var blur = value;
+                                    if (blur % 2 == 0) blur -= 1;
+                                    message.log('Blur', blur);
+                                    analyzedImage.blur = blur;
+                                    analyzedImage.applyEffects(originalImage.image);
+                                    localStorage.set('blurSlider', value);
+                                }
+                            }
+
+                            MySlider {
+                                id: darkThresholdSlider
+                                label: 'Dark Threashold'
+                                min: 0
+                                max: 255
+                                defaultValue: localStorage.get('darkThresholdSlider') || 0
+                                onValueChanged: localStorage.set('darkThresholdSlider', value)
+                            }
+
+                            MySlider {
+                                id: lightThresholdSlider
+                                label: 'Light Threshold'
+                                min: 0
+                                max: 255
+                                defaultValue: localStorage.get('lightThresholdSlider') || 0
+                                onValueChanged: localStorage.set('lightThresholdSlider', value)
+                            }
                         }
                     }
-
-                    MySlider {
-                        id: thresholdSlider
-                        label: 'Threshold'
-                        min: 0
-                        max: 255
-                        defaultValue: localStorage.get('thresholdSlider')
-                        onValueChanged: localStorage.set('thresholdSlider', value)
-                    }
                 }
-            }
 
-            Item { Layout.minimumHeight: 10 }
-
-            Text {
-                text: 'Target'
-                font.bold: true
-            }
-
-            GroupBox {
                 ColumnLayout {
-                    spacing: 10
 
-                    MySlider {
-                        id: meshXSlider
-                        label: 'Target X'
-                        max: analyzedImage.imageWidth
-                        defaultValue: localStorage.get('meshXSlider')
-                        onValueChanged: localStorage.set('meshXSlider', value)
+                    Text {
+                        text: 'Target'
+                        font.bold: true
                     }
 
-                    MySlider {
-                        id: meshYSlider
-                        label: 'TargetY'
-                        max: analyzedImage.imageHeight
-                        defaultValue: localStorage.get('meshYSlider')
-                        onValueChanged: localStorage.set('meshYSlider', value)
-                    }
+                    GroupBox {
+                        Layout.minimumWidth: buttons.width
 
-                    MySlider {
-                        id: meshWidthSlider
-                        label: 'Target Width'
-                        max: analyzedImage.imageWidth
-                        defaultValue: localStorage.get('meshWidthSlider')
-                        onValueChanged: localStorage.set('meshWidthSlider', value)
-                    }
+                        ColumnLayout {
+                            spacing: 10
 
-                    MySlider {
-                        id: meshHeightSlider
-                        label: 'Target Height'
-                        max: analyzedImage.imageHeight
-                        defaultValue: localStorage.get('meshHeightSlider')
-                        onValueChanged: localStorage.set('meshHeightSlider', value)
-                    }
+                            MySlider {
+                                id: meshXSlider
+                                label: 'Target X'
+                                max: analyzedImage.imageWidth
+                                defaultValue: localStorage.get('meshXSlider') || analyzedImage.imageWidth/4
+                                onValueChanged: localStorage.set('meshXSlider', value)
+                            }
 
-                    MySlider {
-                        id: meshNumXSlider
-                        label: 'Mesh Num X'
-                        min: 1
-                        max: 50
-                        defaultValue: localStorage.get('meshNumXSlider')
-                        onValueChanged: localStorage.set('meshNumXSlider', value)
-                    }
+                            MySlider {
+                                id: meshYSlider
+                                label: 'TargetY'
+                                max: analyzedImage.imageHeight
+                                defaultValue: localStorage.get('meshYSlider') || analyzedImage.imageHeight/4
+                                onValueChanged: localStorage.set('meshYSlider', value)
+                            }
 
-                    MySlider {
-                        id: meshNumYSlider
-                        label: 'Mesh Num Y'
-                        min: 1
-                        max: 50
-                        defaultValue: localStorage.get('meshNumYSlider')
-                        onValueChanged: localStorage.set('meshNumYSlider', value)
-                    }
-                }
-            }
+                            MySlider {
+                                id: meshWidthSlider
+                                label: 'Target Width'
+                                max: analyzedImage.imageWidth
+                                defaultValue: localStorage.get('meshWidthSlider') || analyzedImage.imageWidth/2
+                                onValueChanged: localStorage.set('meshWidthSlider', value)
+                            }
 
-            Item { Layout.minimumHeight: 10 }
+                            MySlider {
+                                id: meshHeightSlider
+                                label: 'Target Height'
+                                max: analyzedImage.imageHeight
+                                defaultValue: localStorage.get('meshHeightSlider') || analyzedImage.imageHeight/2
+                                onValueChanged: localStorage.set('meshHeightSlider', value)
+                            }
 
-            RowLayout {
-                id: buttons
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                            MySlider {
+                                id: meshNumXSlider
+                                label: 'Mesh Num X'
+                                min: 1
+                                max: 50
+                                defaultValue: localStorage.get('meshNumXSlider') || 10
+                                onValueChanged: localStorage.set('meshNumXSlider', value)
+                            }
 
-                Button {
-                    text: 'Analyze'
-                    onClicked: {
-                        analyzedImage.numX = meshNumXSlider.value;
-                        analyzedImage.numY = meshNumYSlider.value;
-                        analyzedImage.targetX = meshXSlider.value;
-                        analyzedImage.targetY = meshYSlider.value;
-                        analyzedImage.targetWidth  = meshWidthSlider.value;
-                        analyzedImage.targetHeight = meshHeightSlider.value;
-                        var averageColors = analyzedImage.analyze(analyzedImage.image);
-
-                        // calc average color for the whole area
-                        var wholeAverage = 0;
-                        for (var i = 0; i < averageColors.length; ++i) {
-                            for (var j = 0; j < averageColors[0].length; ++j) {
-                                wholeAverage += averageColors[i][j];
+                            MySlider {
+                                id: meshNumYSlider
+                                label: 'Mesh Num Y'
+                                min: 1
+                                max: 50
+                                defaultValue: localStorage.get('meshNumYSlider') || 10
+                                onValueChanged: localStorage.set('meshNumYSlider', value)
                             }
                         }
-                        wholeAverage /= averageColors.length * averageColors[0].length;
+                    }
 
-                        // check the darker area
-                        var checkArr = [];
-                        for (var i = 0; i < averageColors.length; ++i) {
-                            checkArr[i] = [];
-                            for (var j = 0; j < averageColors[0].length; ++j) {
-                                var diff = wholeAverage - averageColors[i][j];
-                                checkArr[i][j] = (diff > thresholdSlider.value) ? 1 : 0;
+                    Item { Layout.minimumHeight: 10 }
+
+                    RowLayout {
+                        id: buttons
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+
+                        Button {
+                            text: 'Analyze'
+                            onClicked: {
+                                analyzedImage.numX = meshNumXSlider.value;
+                                analyzedImage.numY = meshNumYSlider.value;
+                                analyzedImage.targetX = meshXSlider.value;
+                                analyzedImage.targetY = meshYSlider.value;
+                                analyzedImage.targetWidth  = meshWidthSlider.value;
+                                analyzedImage.targetHeight = meshHeightSlider.value;
+                                var averageColors = analyzedImage.analyze(analyzedImage.image);
+
+                                // calc average color for the whole area
+                                var wholeAverage = 0;
+                                for (var i = 0; i < averageColors.length; ++i) {
+                                    for (var j = 0; j < averageColors[0].length; ++j) {
+                                        wholeAverage += averageColors[i][j];
+                                    }
+                                }
+                                wholeAverage /= averageColors.length * averageColors[0].length;
+
+                                // define level
+                                var Type = {
+                                    Base   : 0,
+                                    Shadow : -1,
+                                    Block  : 1
+                                };
+
+                                // check the darker area
+                                var checkArr = [];
+                                for (var i = 0; i < averageColors.length; ++i) {
+                                    checkArr[i] = [];
+                                    for (var j = 0; j < averageColors[i].length; ++j) {
+                                        var diff = wholeAverage - averageColors[i][j];
+                                        checkArr[i][j] = (diff >  darkThresholdSlider.value)  ? Type.Shadow :
+                                                                                                (diff < -lightThresholdSlider.value) ? Type.Block  : Type.Base;
+                                    }
+                                }
+
+                                // create result array
+                                var levelMap = [];
+                                for (var i = 0; i < checkArr.length; ++i) {
+                                    levelMap[i] = [];
+                                    var preValue = Type.Base;
+                                    var level    = 0;
+                                    var error    = 0;
+                                    for (var j = 0; j < checkArr[i].length; ++j) {
+                                        var currentValue = checkArr[i][j];
+                                        switch (preValue) {
+                                        case Type.Base: // 基板
+                                            switch (currentValue) {
+                                            case Type.Base   : break;
+                                            case Type.Shadow : break;
+                                            case Type.Block  : ++error; ++level; break;
+                                            default: ++error; break;
+                                            }
+                                            break;
+                                        case Type.Shadow: // 影
+                                            switch (currentValue) {
+                                            case Type.Base   : ++error; level = 0; break;
+                                            case Type.Shadow : ++level; break;
+                                            case Type.Block  : ++level; break;
+                                            default: ++error; break;
+                                            }
+                                            break;
+                                        case Type.Block: // ブロック
+                                            switch (currentValue) {
+                                            case Type.Base   : level = 0; break;
+                                            case Type.Shadow : ++level; break;
+                                            case Type.Block  : break;
+                                            default: ++error; break;
+                                            }
+                                            break;
+                                        }
+                                        preValue = currentValue;
+                                        levelMap[i][j] = level;
+                                    }
+                                }
+
+                                // set and draw result
+                                targetArea.texts = levelMap;
                             }
                         }
-                        targetArea.texts = checkArr;
+
+                        Button {
+                            text: 'Reset'
+                            onClicked: {
+                                analyzedImage.applyEffects(originalImage.image);
+                                targetArea.texts = [];
+                            }
+                        }
                     }
-                }
 
-                Button {
-                    text: 'Reset'
-                    onClicked: {
-                        analyzedImage.applyEffects(originalImage.image);
-                        targetArea.texts = [];
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+
+                        Button {
+                            text: 'Quit'
+                            onClicked: Qt.quit();
+                        }
                     }
-                }
-            }
-
-            Item {  Layout.fillHeight: true }
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-
-                Button {
-                    text: 'Quit'
-                    onClicked: Qt.quit();
                 }
             }
         }

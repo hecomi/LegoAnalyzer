@@ -1,0 +1,133 @@
+<?xml version="1.0" standalone="yes"?>
+<CalibrationProject>
+  <xs:schema id="CalibrationProject" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="CalibrationProject" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ObjWidth" type="xs:int" minOccurs="0" />
+                <xs:element name="ObjHeight" type="xs:int" minOccurs="0" />
+                <xs:element name="FieldSize" type="xs:double" minOccurs="0" />
+                <xs:element name="DetectionMethod" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="images">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ImagePath" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceType" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="results">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ImageCount" type="xs:int" minOccurs="0" />
+                <xs:element name="focus_lenX" type="xs:double" minOccurs="0" />
+                <xs:element name="focus_lenY" type="xs:double" minOccurs="0" />
+                <xs:element name="PrincipalX" type="xs:double" minOccurs="0" />
+                <xs:element name="PrincipalY" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist1" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist2" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist3" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist4" type="xs:double" minOccurs="0" />
+                <xs:element name="focus_lenX_er" type="xs:double" minOccurs="0" />
+                <xs:element name="focus_lenY_er" type="xs:double" minOccurs="0" />
+                <xs:element name="PrincipalX_er" type="xs:double" minOccurs="0" />
+                <xs:element name="PrincipalY_er" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist1_er" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist2_er" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist3_er" type="xs:double" minOccurs="0" />
+                <xs:element name="Dist4_er" type="xs:double" minOccurs="0" />
+                <xs:element name="dc_AllImage_errX" type="xs:double" minOccurs="0" />
+                <xs:element name="dc_AllImage_errY" type="xs:double" minOccurs="0" />
+                <xs:element name="Calib_Date" type="xs:string" minOccurs="0" />
+                <xs:element name="Calib_Type" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <data>
+    <ObjWidth>7</ObjWidth>
+    <ObjHeight>10</ObjHeight>
+    <FieldSize>31.5</FieldSize>
+    <DetectionMethod>3</DetectionMethod>
+  </data>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\013.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\014.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\015.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\016.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\017.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\018.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\019.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\020.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\021.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\022.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\023.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <images>
+    <ImagePath>C:\Users\hecomi\Pictures\カメラ ロール\024.jpg</ImagePath>
+    <SourceType>0</SourceType>
+  </images>
+  <results>
+    <ImageCount>12</ImageCount>
+    <focus_lenX>1051.9580892421748</focus_lenX>
+    <focus_lenY>1055.058996017832</focus_lenY>
+    <PrincipalX>566.21312083452312</PrincipalX>
+    <PrincipalY>369.3762681675521</PrincipalY>
+    <Dist1>-0.42770612543378866</Dist1>
+    <Dist2>0.20630073373863517</Dist2>
+    <Dist3>0.0025958984962278788</Dist3>
+    <Dist4>0.0017098282257637172</Dist4>
+    <focus_lenX_er>1.7634527683258057</focus_lenX_er>
+    <focus_lenY_er>1.7577959299087524</focus_lenY_er>
+    <PrincipalX_er>1.3654837608337402</PrincipalX_er>
+    <PrincipalY_er>1.0438365936279297</PrincipalY_er>
+    <Dist1_er>0.00864959042519331</Dist1_er>
+    <Dist2_er>0.083226986229419708</Dist2_er>
+    <Dist3_er>0.00028164160903543234</Dist3_er>
+    <Dist4_er>0.00022342739976011217</Dist4_er>
+    <dc_AllImage_errX>0.299013035196219</dc_AllImage_errX>
+    <dc_AllImage_errY>0.28039975757881935</dc_AllImage_errY>
+    <Calib_Date>2013/09/24 1:46:49</Calib_Date>
+    <Calib_Type>2</Calib_Type>
+  </results>
+</CalibrationProject>

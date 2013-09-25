@@ -1,4 +1,5 @@
 #include <QtGui/QGuiApplication>
+#include <QQmlEngine>
 #include "qtquick2applicationviewer.h"
 #include "camera_image.h"
 #include "analyzed_image.h"
@@ -19,6 +20,8 @@ int main(int argc, char *argv[])
     // Show QML
     viewer.setMainQmlFile(QStringLiteral("qml/LegoAnalyzer/main.qml"));
     viewer.showExpanded();
+
+    std::cout << viewer.engine()->offlineStoragePath().toStdString() << std::endl;
 
     // Run
     return app.exec();

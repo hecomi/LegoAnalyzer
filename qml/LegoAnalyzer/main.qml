@@ -3,6 +3,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls 1.0
 import OpenCV 1.0
 import 'Contents'
+import 'Style'
 
 Rectangle {
     id: window
@@ -25,6 +26,7 @@ Rectangle {
         anchors.bottom: statusBar.top
         anchors.margins: 12
         clip: true
+        style: TabStyle {}
 
         Tab {
             id: cameraView
@@ -35,7 +37,7 @@ Rectangle {
 
         Tab {
             id: analyzedImageView
-            title: "Analyzed"
+            title: "Picture"
             anchors.margins: 16
             AnalyzedImageView {
                 message: statusBar

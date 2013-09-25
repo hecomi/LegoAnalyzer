@@ -1,7 +1,7 @@
 import QtQuick 2.1
 import OpenCV 1.0
 
-Rectangle {
+Camera {
     property int frameRate: 30
 
     function start() {
@@ -10,11 +10,6 @@ Rectangle {
 
     function stop() {
         timer.running = false;
-    }
-
-    Camera {
-        id: camera
-        anchors.fill: parent
     }
 
     Timer {
