@@ -14,8 +14,12 @@ class AnalyzedImage : public Image
     Q_PROPERTY(int numY MEMBER numY_)
     Q_PROPERTY(int targetX MEMBER targetX_)
     Q_PROPERTY(int targetY MEMBER targetY_)
-    Q_PROPERTY(int targetWidth MEMBER targetWidth_)
+    Q_PROPERTY(int targetWidth  MEMBER targetWidth_)
     Q_PROPERTY(int targetHeight MEMBER targetHeight_)
+    Q_PROPERTY(int exceptX MEMBER exceptX_)
+    Q_PROPERTY(int exceptY MEMBER exceptY_)
+    Q_PROPERTY(int exceptWidth  MEMBER exceptWidth_)
+    Q_PROPERTY(int exceptHeight MEMBER exceptHeight_)
 
 public:
     explicit AnalyzedImage(QQuickItem *parent = 0);
@@ -43,6 +47,8 @@ private:
     int blur_;
     int targetX_, targetY_;
     int targetWidth_, targetHeight_;
+    int exceptX_, exceptY_;
+    int exceptWidth_, exceptHeight_;
     int numX_, numY_;
 };
 

@@ -3,6 +3,8 @@
 #include "qtquick2applicationviewer.h"
 #include "camera_image.h"
 #include "analyzed_image.h"
+#include "osc.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +18,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<MontBlanc::Image>("OpenCV", 1, 0, "PlainImage");
     qmlRegisterType<MontBlanc::CameraImage>("OpenCV", 1, 0, "Camera");
     qmlRegisterType<MontBlanc::AnalyzedImage>("OpenCV", 1, 0, "AnalyzedImage");
+    qmlRegisterType<MontBlanc::OSCSender>("OSC", 1, 0, "OSCSender");
 
     // Show QML
     viewer.setMainQmlFile(QStringLiteral("qml/LegoAnalyzer/main.qml"));

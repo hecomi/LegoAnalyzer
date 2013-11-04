@@ -10,7 +10,8 @@ namespace MontBlanc
 AnalyzedImage::AnalyzedImage(QQuickItem *parent)
     : MontBlanc::Image(parent), blur_(0),
       numX_(20), numY_(20),
-      targetX_(200), targetY_(10), targetWidth_(300), targetHeight_(300)
+      targetX_(200), targetY_(10), targetWidth_(300), targetHeight_(300),
+      exceptX_(100), exceptY_(100), exceptWidth_(200), exceptHeight_(100)
 {
 }
 
@@ -28,6 +29,9 @@ void AnalyzedImage::applyEffects(const QVariant& var)
 
     // Blur
     cv::medianBlur(image, image, (blur_ % 2 == 1) ? blur_ : blur_ + 1);
+
+    // draw except area as black
+    // cv::rectangle(image, cv::Point(exceptX_, exceptY_), cv::Point(exceptWidth_, exceptHeight_), cv::Scalar(0, 0, 0));
 
     // GRAY -> ARGB
     cv::cvtColor(image, image, CV_GRAY2BGRA);

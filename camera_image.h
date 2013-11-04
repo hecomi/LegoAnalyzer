@@ -9,6 +9,7 @@ namespace MontBlanc
 class CameraImage : public Image
 {
     Q_OBJECT
+    Q_PROPERTY(double rotation MEMBER rotation_)
     Q_PROPERTY(double fx MEMBER fx_)
     Q_PROPERTY(double fy MEMBER fy_)
     Q_PROPERTY(double cx MEMBER cx_)
@@ -26,6 +27,7 @@ public:
 private:
     cv::VideoCapture camera_;
     bool isUndistorted_;
+    double rotation_, scale_;
     double fx_, fy_, cx_, cy_;
     double k1_, k2_, p1_, p2_;
 };

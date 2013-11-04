@@ -2,6 +2,7 @@ import QtQuick 2.1
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import OpenCV 1.0
+import OSC 1.0
 import '.'
 import '../Style'
 import '../Common'
@@ -11,10 +12,23 @@ RowLayout {
     id: view
     property var message: console
 
+    QtObject {
+        id: levelMaps
+        property int num: 5
+        property var preStable: null
+        property var caches: []
+    }
+
     Storage {
         id: localStorage
         name: 'LegoAnalyzer'
         description: 'Lego Analyzer Settings'
+    }
+
+    OSCSender {
+        id: osc
+        ip: '127.0.0.1'
+        port: 4567
     }
 
     PlainImage {
@@ -35,6 +49,8 @@ RowLayout {
             height: 480
             onImageChanged: {
                 camera.isUndistorted = localStorage.get('isUndistorted') || camera.isUndistorted;
+                camera.rotation = localStorage.get('rotation') || camera.rotation;
+                camera.scale    = localStorage.get('scale')    || camera.scale;
                 camera.fx = localStorage.get('fx') || camera.fx;
                 camera.fy = localStorage.get('fy') || camera.fy;
                 camera.cx = localStorage.get('cx') || camera.cx;
@@ -43,13 +59,204 @@ RowLayout {
                 camera.k2 = localStorage.get('k2') || camera.k2;
                 camera.p1 = localStorage.get('p1') || camera.p1;
                 camera.p2 = localStorage.get('p2') || camera.p2;
+
+                if (useCamera.checked) {
+                    analyzedImage.applyEffects(getImage());
+                    if (alwaysAnalyze.checked) analyze();
+                }
             }
         }
+    }
+
+    function copy(arr) {
+        // 1 dim.
+        if (arr[0][0] === undefined) {
+            return arr.slice(0);
+        }
+
+        // 2 dim.
+        var copied = [];
+        for (var i = 0; i < arr.length; ++i) {
+            copied[i] = arr[i].slice(0);
+        }
+        return copied;
     }
 
     function getImage() {
         return (useCamera.checked) ? camera.image : plainImage.image;
     }
+
+    function analyze() {
+        analyzedImage.numX = meshNumXSlider.value;
+        analyzedImage.numY = meshNumYSlider.value;
+        analyzedImage.targetX = meshXSlider.value;
+        analyzedImage.targetY = meshYSlider.value;
+        analyzedImage.targetWidth  = meshWidthSlider.value;
+        analyzedImage.targetHeight = meshHeightSlider.value;
+        var averageColors = analyzedImage.analyze(analyzedImage.image);
+
+        // calc average color for the whole area
+        var wholeAverage = 0;
+        for (var i = 0; i < averageColors.length; ++i) {
+            for (var j = 0; j < averageColors[0].length; ++j) {
+                wholeAverage += averageColors[i][j];
+            }
+        }
+        wholeAverage /= averageColors.length * averageColors[0].length;
+
+        // define level
+        var Type = {
+            Base   : 0,
+            Shadow : -1,
+            Block  : 1
+        };
+
+        // check the darker / lighter area
+        var checkArr = [];
+        for (var i = 0; i < averageColors.length; ++i) {
+            checkArr[i] = [];
+            for (var j = 0; j < averageColors[i].length; ++j) {
+                var diff = wholeAverage - averageColors[i][j];
+                checkArr[i][j] = (diff >  darkThresholdSlider.value)  ? Type.Shadow :
+                                 (diff < -lightThresholdSlider.value) ? Type.Block  : Type.Base;
+            }
+        }
+
+        // create result array
+        var levelMap = [];
+        for (var i = 0; i < checkArr.length; ++i) {
+            levelMap[i] = [];
+            var preValue = Type.Base;
+            var level    = 0;
+            var error    = 0;
+            for (var j = 0; j < checkArr[i].length; ++j) {
+                var currentValue = checkArr[i][j];
+                switch (preValue) {
+                    case Type.Base: // 基板
+                        switch (currentValue) {
+                            case Type.Base   : break;
+                            case Type.Shadow : break;
+                            case Type.Block  : ++error; ++level; break;
+                            default: ++error; break;
+                        }
+                        break;
+                    case Type.Shadow: // 影
+                        switch (currentValue) {
+                            case Type.Base   : ++error; level = 0; break;
+                            case Type.Shadow : ++level; break;
+                            case Type.Block  : ++level; break;
+                            default: ++error; break;
+                        }
+                        break;
+                    case Type.Block: // ブロック
+                        switch (currentValue) {
+                            case Type.Base   : level = 0; break;
+                            case Type.Shadow : ++level; break;
+                            case Type.Block  : break;
+                            default: ++error; break;
+                        }
+                        break;
+                }
+                preValue = currentValue;
+                levelMap[i][j] = level;
+            }
+        }
+
+        // set dossun area as darker
+        for (var j = 13; j <= 20; ++j) {
+            levelMap[15][j] = levelMap[16][j] = 0;
+        }
+
+        // set for drawing level
+        targetArea.texts = copy(levelMap);
+
+        // check if stable
+        var stableFlag = true;
+        for (var i = 0; i < levelMaps.num; ++i) {
+            for (var j = 0; j < levelMap.length; ++j) {
+                for (var k = 0; k < levelMap[j].length; ++k) {
+                    if (levelMaps.caches[i]       === undefined ||
+                            levelMaps.caches[i][j]    === undefined ||
+                            levelMaps.caches[i][j][k] === undefined) {
+                        stableFlag = false;
+                        break;
+                    }
+                    if (levelMap[j][k] !== levelMaps.caches[i][j][k]) {
+                        stableFlag = false;
+                        break;
+                    }
+                }
+                if (!stableFlag) break;
+            }
+            if (!stableFlag) break;
+        }
+
+        // update level map cache
+        if (levelMaps.caches.length >= levelMaps.num) {
+            levelMaps.caches.pop();
+        }
+        levelMaps.caches.unshift(copy(levelMap));
+
+        // search change points
+        if (stableFlag) {
+            var changePointsArr = [];
+            var changeFlag = false;
+            if (levelMaps.preStable === null) {
+                levelMaps.preStable = copy(levelMap);
+            } else {
+                for (var i = 0; i < levelMap.length; ++i) {
+                    changePointsArr[i] = [];
+                    for (var j = 0; j < levelMap[i].length; ++j) {
+                        var change = levelMap[i][j] - levelMaps.preStable[i][j];
+                        changePointsArr[i][j] = change;
+                        if (change !== 0) {
+                            changeFlag = true;
+                            if (change > 0) {
+                                oscSender.register('/LegoAnalyzer/AddBlock', i, j);
+                            } else if (change < 0) {
+                                oscSender.register('/LegoAnalyzer/DeleteBlock', i, j);
+                            }
+                        }
+                    }
+                }
+                if (changeFlag) {
+                    levelMaps.preStable = copy(levelMap);
+                    targetArea.changes = copy(changePointsArr);
+                }
+            }
+        }
+    }
+
+    // Send osc timer
+    Timer {
+        id: oscSender
+        property int fps: 30
+        property var queue: []
+        function register() {
+            queue.push(Array.prototype.slice.call(arguments, 0));
+        }
+        repeat: true
+        interval: 1000 / fps
+        running: true
+        onTriggered: {
+            var msg = queue.shift();
+            if (msg) {
+                console.log(msg);
+                switch (msg.length) {
+                    case 2:
+                        osc.send(msg[0], msg[1]);
+                        break;
+                    case 3:
+                        osc.send(msg[0], msg[1], msg[2]);
+                        break;
+                    default:
+                        console.warn("unknown osc message type", msg);
+                        break;
+                }
+            }
+        }
+    }
+
 
     RowLayout {
         ColumnLayout {
@@ -60,6 +267,7 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.maximumWidth: view.width - 250
                 Layout.maximumHeight: view.height - 40
+
                 AnalyzedImage {
                     id: analyzedImage
                     anchors.fill: parent
@@ -172,6 +380,22 @@ RowLayout {
                     CheckBox {
                         id: useCamera
                         checked: false
+                        onCheckedChanged: analyzedImage.applyEffects(getImage())
+                    }
+                    Item {
+                        Layout.preferredWidth: 12
+                    }
+                    Text {
+                        text: 'Always analyze: '
+                    }
+                    CheckBox {
+                        id: alwaysAnalyze
+                        checked: false
+                        onCheckedChanged: {
+                            if (!checked) {
+                                targetArea.texts = [];
+                            }
+                        }
                     }
                     Item {
                         Layout.preferredWidth: 12
@@ -186,7 +410,7 @@ RowLayout {
                         onAccepted: {
                             localStorage.set('imagePath', text);
                             plainImage.src = text;
-                            if (!useCamera) {
+                            if (!useCamera.checked) {
                                 analyzedImage.applyEffects(plainImage.image);
                             }
                         }
@@ -201,6 +425,7 @@ RowLayout {
 
         ScrollView {
             Layout.fillHeight: true
+
             ColumnLayout {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
 
@@ -324,85 +549,7 @@ RowLayout {
 
                         Button {
                             text: 'Analyze'
-                            onClicked: {
-                                analyzedImage.numX = meshNumXSlider.value;
-                                analyzedImage.numY = meshNumYSlider.value;
-                                analyzedImage.targetX = meshXSlider.value;
-                                analyzedImage.targetY = meshYSlider.value;
-                                analyzedImage.targetWidth  = meshWidthSlider.value;
-                                analyzedImage.targetHeight = meshHeightSlider.value;
-                                var averageColors = analyzedImage.analyze(analyzedImage.image);
-
-                                // calc average color for the whole area
-                                var wholeAverage = 0;
-                                for (var i = 0; i < averageColors.length; ++i) {
-                                    for (var j = 0; j < averageColors[0].length; ++j) {
-                                        wholeAverage += averageColors[i][j];
-                                    }
-                                }
-                                wholeAverage /= averageColors.length * averageColors[0].length;
-
-                                // define level
-                                var Type = {
-                                    Base   : 0,
-                                    Shadow : -1,
-                                    Block  : 1
-                                };
-
-                                // check the darker area
-                                var checkArr = [];
-                                for (var i = 0; i < averageColors.length; ++i) {
-                                    checkArr[i] = [];
-                                    for (var j = 0; j < averageColors[i].length; ++j) {
-                                        var diff = wholeAverage - averageColors[i][j];
-                                        checkArr[i][j] = (diff >  darkThresholdSlider.value)  ? Type.Shadow :
-                                                                                                (diff < -lightThresholdSlider.value) ? Type.Block  : Type.Base;
-                                    }
-                                }
-
-                                // create result array
-                                var levelMap = [];
-                                for (var i = 0; i < checkArr.length; ++i) {
-                                    levelMap[i] = [];
-                                    var preValue = Type.Base;
-                                    var level    = 0;
-                                    var error    = 0;
-                                    for (var j = 0; j < checkArr[i].length; ++j) {
-                                        var currentValue = checkArr[i][j];
-                                        switch (preValue) {
-                                        case Type.Base: // 基板
-                                            switch (currentValue) {
-                                            case Type.Base   : break;
-                                            case Type.Shadow : break;
-                                            case Type.Block  : ++error; ++level; break;
-                                            default: ++error; break;
-                                            }
-                                            break;
-                                        case Type.Shadow: // 影
-                                            switch (currentValue) {
-                                            case Type.Base   : ++error; level = 0; break;
-                                            case Type.Shadow : ++level; break;
-                                            case Type.Block  : ++level; break;
-                                            default: ++error; break;
-                                            }
-                                            break;
-                                        case Type.Block: // ブロック
-                                            switch (currentValue) {
-                                            case Type.Base   : level = 0; break;
-                                            case Type.Shadow : ++level; break;
-                                            case Type.Block  : break;
-                                            default: ++error; break;
-                                            }
-                                            break;
-                                        }
-                                        preValue = currentValue;
-                                        levelMap[i][j] = level;
-                                    }
-                                }
-
-                                // set and draw result
-                                targetArea.texts = levelMap;
-                            }
+                            onClicked: analyze()
                         }
 
                         Button {

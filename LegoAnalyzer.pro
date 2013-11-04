@@ -15,7 +15,8 @@ QML_IMPORT_PATH =
 SOURCES += main.cpp \
 	image.cpp \
 	analyzed_image.cpp \
-	camera_image.cpp
+	camera_image.cpp \
+	osc.cpp
 
 # Installation path
 # target.path =
@@ -27,14 +28,13 @@ qtcAddDeployment()
 HEADERS += \
 	image.h \
 	analyzed_image.h \
-	camera_image.h
+	camera_image.h \
+	osc.h
 
 QMAKE_CFLAGS_WARN_OFF += -Woverloaded-virtual
 QMAKE_INCDIR += /usr/local/include
+QMAKE_INCDIR += $$PWD/include
 QMAKE_LIBDIR += /usr/local/lib
-QMAKE_LIBS   += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_nonfree -lopencv_features2d
+QMAKE_LIBDIR += $$PWD/lib
+QMAKE_LIBS   += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_nonfree -lopencv_features2d -loscpack
 
-OTHER_FILES += \
-	qml/LegoAnalyzer/Camera.qml \
-	qml/LegoAnalyzer/MyMenuBar.qml \
-    qml/LegoAnalyzer/Contents/Storage.qml

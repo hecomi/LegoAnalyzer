@@ -8,6 +8,7 @@ Rectangle {
     property int   numX        : 10
     property int   numY        : 10
     property var   texts       : []
+    property var   changes     : []
 
     onNumXChanged  : canvas.requestPaint();
     onNumYChanged  : canvas.requestPaint();
@@ -31,9 +32,9 @@ Rectangle {
             context.strokeStyle   = lineColor;
             context.fillStyle     = lineColor;
             context.shadowColor   = shadowColor;
-            context.shadowOffsetX = 1;
-            context.shadowOffsetY = 1;
-            context.shadowBlur    = 3;
+            //context.shadowOffsetX = 1;
+            //context.shadowOffsetY = 1;
+            //context.shadowBlur    = 3;
             context.font          = ((grid.width > grid.height) ? Math.floor(grid.height/2) : Math.floor(grid.width/3)) + 'px bold';
             context.textAlign     = 'center';
             context.textBaseline  = 'middle';
@@ -53,6 +54,9 @@ Rectangle {
                 for (var j = 0; j < texts[0].length; ++j) {
                     var x = grid.width  * i + grid.width/2;
                     var y = grid.height * j + grid.height/2;
+                    if (changes[i] !== undefined && changes[i][j] !== undefined) {
+                        texts[i][j] += changes[i][j] > 0 ? '+' : changes[i][j] < 0 ? '-' : '';
+                    }
                     context.fillText(texts[i][j], x, y);
                 }
             }
